@@ -114,8 +114,10 @@ void sdl_handle_events(SparseGrid *grid) {
                 if (e.key.keysym.sym == SDLK_SPACE) {
                     if (pause) {
                         pause = 0;
+                        SDL_SetWindowTitle(window, "Game of Life");
                     } else {
                         pause = 1;
+                        SDL_SetWindowTitle(window, "###!PAUSED!###");
                     }
                 }
 
