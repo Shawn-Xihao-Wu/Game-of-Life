@@ -1,3 +1,6 @@
+#ifndef SPARSE_GRID_H
+#define SPARSE_GRID_H
+
 #define LENGTH 50
 #define WIDTH 50
 #define GRID_SIZE LENGTH*WIDTH
@@ -31,3 +34,4 @@ Cell *sparse_grid_get_cell(SparseGrid *grid, unsigned int x, unsigned y);
 
 void sparse_grid_update(SparseGrid *grid);
 
+#endif /* SPARSE_GRID_H */

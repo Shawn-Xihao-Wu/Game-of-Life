@@ -25,7 +25,7 @@ void sparse_grid_destroy(SparseGrid *grid) {
     //Free the memory for each node in the grid
     for (int i = 0; i < GRID_SIZE; i++) {
         Node *cur = grid->grid[i];
-        while (cur != NULL) {
+        while (cur) {
             Node *next = cur->next;
             free(cur);
             cur = next;
@@ -40,7 +40,7 @@ int sparse_grid_add_cell(SparseGrid *grid, unsigned int x, unsigned int y) {
     Node *cur = grid->grid[index];
 
     //Check if the cell already exists in the grid
-    while (cur != NULL) {
+    while (cur) {
         if (cur->x == x && cur->y == y) {
             return 0;
         }
@@ -69,7 +69,7 @@ Cell *sparse_grid_get_cell(SparseGrid *grid, unsigned int x, unsigned y) {
     unsigned int index = hash(x, y);
     Node *cur = grid->grid[index];
 
-    while (cur != NULL) {
+    while (cur) {
         if (cur->x == x && cur->y == y) {
             return &(cur->cell);
         }
@@ -84,7 +84,7 @@ int sparse_grid_delete_cell(SparseGrid *grid, unsigned int x, unsigned int y) {
     Node *cur = grid->grid[index];
     Node *prev = NULL;
 
-    while (cur != NULL) {
+    while (cur) {
         if (cur->x == x && cur->y == y) { 
             //Finding the cell to delete
             if (prev == NULL) { 
@@ -112,7 +112,7 @@ int sparse_grid_put_cell_inc_count(SparseGrid *grid, unsigned int x, unsigned in
     Node *cur = grid->grid[index];
 
     //if the cell already exists in the grid, just increase the count
-    while (cur != NULL) {
+    while (cur) {
         if (cur->x == x && cur->y == y) {
             cur->cell.count++;
             return 0;
@@ -145,7 +145,7 @@ void sparse_grid_update(SparseGrid *grid) {
     unsigned int y = 0;
     for (int i = 0; i < GRID_SIZE; i++) {
         Node *cur = grid->grid[i];
-        while (cur != NULL) {
+        while (cur) {
             if (cur->cell.state == 1) {
                 x = cur->x;
                 y = cur->y;
@@ -166,7 +166,7 @@ void sparse_grid_update(SparseGrid *grid) {
     //Leave only the cells that satisfy the criteria
     for (int i = 0; i < GRID_SIZE; i++) {
         Node *cur = grid->grid[i];
-        while (cur != NULL) {
+        while (cur) {
             Node *next = cur->next;
             if ((cur->cell.count == 3) || (cur->cell.count == 4 && cur->cell.state == 1)) {
                 //KEEP THE CELL

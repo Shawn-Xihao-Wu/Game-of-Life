@@ -1,6 +1,7 @@
 #include "sparse_grid.h"
-#include <stdio.h>
-#include <unistd.h> // for usleep
+#include "sdl_helpers.h"
+#include <unistd.h>
+#include <SDL2/SDL.h>
 
 int main(int argc, char *argv[]) {
 
@@ -11,26 +12,32 @@ int main(int argc, char *argv[]) {
     sparse_grid_add_cell(grid, 26, 24);
     sparse_grid_add_cell(grid, 27, 24);
 
-    for (int i = 0; i < 10; i ++) {
-        //render
-        for (unsigned int x = 0; x < LENGTH; x++) {
-            for (unsigned int y = 0; y < WIDTH; y++) {
-                Cell *cell = sparse_grid_get_cell(grid, x, y);
+    sdl_init();
 
-                if (cell) {
-                    printf("x");
-                } else {
-                    printf(" ");
-                }
+    int running = 1;
+    int paused = 0;
+
+    while (running) {
+        sdl_handle_events(grid, &running, &paused);
+
+        if (!paused) {
+            sparse_grid_update(grid);
+        } else {
+            SDL_LockMutex(pause_mx);
+            while(paused) {
+                SDL_CondWait(pause_cond, pause_mx);
             }
-
-            printf("\n");
+            SDL_UnlockMutex(pause_mx); 
         }
 
-        usleep(100000);
+        sdl_render_grid(grid);
 
-        sparse_grid_update(grid);
+        usleep(1000000);
     }
+
+    sdl_quit();
+
+    sparse_grid_destroy(grid);
 
     return 0;
 }
