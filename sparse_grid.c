@@ -31,6 +31,7 @@ void sparse_grid_destroy(SparseGrid *grid) {
             cur = next;
         }
     }
+
     free(grid);
 }
 
@@ -62,6 +63,20 @@ int sparse_grid_add_cell(SparseGrid *grid, unsigned int x, unsigned int y) {
     grid->grid[index] = node;
 
     return 1;
+}
+
+Cell *sparse_grid_get_cell(SparseGrid *grid, unsigned int x, unsigned y) {
+    unsigned int index = hash(x, y);
+    Node *cur = grid->grid[index];
+
+    while (cur != NULL) {
+        if (cur->x == x && cur->y == y) {
+            return &(cur->cell);
+        }
+        cur = cur->next;
+    }
+
+    return NULL;
 }
 
 int sparse_grid_delete_cell(SparseGrid *grid, unsigned int x, unsigned int y) {
@@ -152,15 +167,16 @@ void sparse_grid_update(SparseGrid *grid) {
     for (int i = 0; i < GRID_SIZE; i++) {
         Node *cur = grid->grid[i];
         while (cur != NULL) {
+            Node *next = cur->next;
             if ((cur->cell.count == 3) || (cur->cell.count == 4 && cur->cell.state == 1)) {
                 //KEEP THE CELL
                 cur->cell.count = 0;
                 cur->cell.state = 1;
+
             } else {
                 sparse_grid_delete_cell(grid, cur->x, cur->y);
             }
-            
-            cur = cur->next;
+            cur = next;
         }
     }
 }
