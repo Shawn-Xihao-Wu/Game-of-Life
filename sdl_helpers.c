@@ -6,9 +6,10 @@
 #define WINDOW_LENGTH 1000
 #define CELL_SIZE 20
 
+#define GAME_UPDATE_INTERVAL 1000 / 3
+
 SDL_Window *window;
 SDL_Renderer *renderer;
-
 
 
 void sdl_init() {
@@ -32,22 +33,25 @@ void sdl_init() {
     }
 
     //Create the renderer
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
     if (renderer == NULL) {
         printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
         exit(1);
     }
 
-    pause_mx = SDL_CreateMutex();
-    pause_cond = SDL_CreateCond(); 
+    quit = 0;
+    pause = 0;
+
+    // mx = SDL_CreateMutex();
+    // cond = SDL_CreateCond(); 
 }
 
 void sdl_quit() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    SDL_DestroyCond(pause_cond);
-    SDL_DestroyMutex(pause_mx);
+    // SDL_DestroyCond(cond);
+    // SDL_DestroyMutex(mx);
 
     SDL_Quit();
 }
@@ -95,28 +99,42 @@ void sdl_render_grid(SparseGrid *grid) {
     SDL_RenderPresent(renderer);
 }
 
-void toggle_pause(int *paused) {
-    SDL_LockMutex(pause_mx);
-    *paused = 0;
-    SDL_CondSignal(pause_cond);
-    SDL_UnlockMutex(pause_mx);
-}
 
-void sdl_handle_events(SparseGrid *grid, int *running, int *paused) {
+void sdl_handle_events(SparseGrid *grid) {
+
     SDL_Event e;
-    while (SDL_PollEvent(&e)) {
+
+    while (SDL_WaitEventTimeout(&e, GAME_UPDATE_INTERVAL)) {
         switch(e.type) {
             case SDL_QUIT:
-                *running = 0;
-                toggle_pause(paused);
+                quit = 1;
                 break;
             
             case SDL_KEYDOWN:
                 if (e.key.keysym.sym == SDLK_SPACE) {
-                    toggle_pause(paused);
-                } else if (e.key.keysym.sym == SDLK_ESCAPE) {
-                    *running = 0;
-                    toggle_pause(paused);
+                    if (pause) {
+                        pause = 0;
+                    } else {
+                        pause = 1;
+                    }
+                }
+
+                break;
+
+            case SDL_MOUSEBUTTONDOWN:
+            
+                if (e.button.button == SDL_BUTTON_LEFT) {
+                    unsigned int x = e.button.x / CELL_SIZE;
+                    unsigned int y = e.button.y / CELL_SIZE;
+
+                    Cell *cell = sparse_grid_get_cell(grid, x, y);
+                    if (cell) {
+                        sparse_grid_delete_cell(grid, x, y);
+
+                    } else {
+                        sparse_grid_add_cell(grid, x, y);
+                    }
+                    sdl_render_grid(grid);
                 }
 
                 break;
@@ -124,5 +142,8 @@ void sdl_handle_events(SparseGrid *grid, int *running, int *paused) {
             default:
                 break;
         }
+        
     }
+    
+
 }
