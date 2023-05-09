@@ -20,7 +20,7 @@ void sdl_init() {
     }
 
     //Create the window
-    window = SDL_CreateWindow("Game of Life",
+    window = SDL_CreateWindow("<CLICK TO ADD OR DELETE CELLS AND PRESS SPACE TO START OR PAUSE>",
                                 SDL_WINDOWPOS_UNDEFINED,
                                 SDL_WINDOWPOS_UNDEFINED,
                                 WINDOW_WIDTH,
@@ -33,7 +33,7 @@ void sdl_init() {
     }
 
     //Create the renderer
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
     if (renderer == NULL) {
         printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
@@ -41,17 +41,14 @@ void sdl_init() {
     }
 
     quit = 0;
-    pause = 0;
+    pause = 1;
 
-    // mx = SDL_CreateMutex();
-    // cond = SDL_CreateCond(); 
+ 
 }
 
 void sdl_quit() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    // SDL_DestroyCond(cond);
-    // SDL_DestroyMutex(mx);
 
     SDL_Quit();
 }
@@ -63,7 +60,7 @@ void sdl_render_grid(SparseGrid *grid) {
     SDL_RenderClear(renderer);
 
     //Set the draw color for cells
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 153, 0, 76, 255);
 
     //Iterate over the live cells in the grid
     for (unsigned int i = 0; i < GRID_SIZE; i++) {
@@ -117,7 +114,7 @@ void sdl_handle_events(SparseGrid *grid) {
                         SDL_SetWindowTitle(window, "Game of Life");
                     } else {
                         pause = 1;
-                        SDL_SetWindowTitle(window, "###!PAUSED!###");
+                        SDL_SetWindowTitle(window, "===PAUSED===");
                     }
                 }
 
